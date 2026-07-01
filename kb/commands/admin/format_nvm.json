@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "name": "Format NVM",
+    "aliases": ["format nvm", "format namespace", "low level format"],
+    "opcode": "0x80",
+    "queue": "Admin",
+    "spec_ref": "NVMe Base Spec 2.0a, Section 5.14, Figure 189",
+    "description": "Low level formats the NVM media, changing LBA data size and/or metadata size. May destroy all data and metadata in affected namespaces."
+  },
+
+  "required_parameters": ["nsid"],
+  "optional_parameters": ["lbafl", "lbafu", "mset", "pi", "pil", "ses"],
+
+  "parameters": {
+    "nsid": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW1",
+      "desc": "Namespace Identifier. Use 0xFFFFFFFF to format all namespaces (subject to FNA field in Identify Controller)."
+    },
+    "lbafl": {
+      "required": false,
+      "type": "uint4",
+      "cdw": "CDW10",
+      "bits": [3, 0],
+      "default": "0x0",
+      "desc": "LBA Format Lower: least significant 4 bits of the Format Index of the User Data Format to apply."
+    },
+    "lbafu": {
+      "required": false,
+      "type": "uint2",
+      "cdw": "CDW10",
+      "bits": [13, 12],
+      "default": "0x0",
+      "desc": "LBA Format Upper: most significant 2 bits of the Format Index. Ignored if LBAFEE is cleared to 0h in Host Behavior Support feature."
+    },
+    "mset": {
+      "required": false,
+      "type": "uint1",
+      "cdw": "CDW10",
+      "bits": [4, 4],
+      "default": "0x0",
+      "desc": "Metadata Settings: I/O Command Set specific. 0 = metadata transferred as separate buffer; 1 = metadata transferred as part of extended data LBA."
+    },
+    "pi": {
+      "required": false,
+      "type": "uint3",
+      "cdw": "CDW10",
+      "bits": [7, 5],
+      "default": "0x0",
+      "desc": "Protection Information: I/O Command Set specific. Specifies whether protection information is enabled and the type (Type 1, 2, or 3)."
+    },
+    "pil": {
+      "required": false,
+      "type": "uint1",
+      "cdw": "CDW10",
+      "bits": [8, 8],
+      "default": "0x0",
+      "desc": "Protection Information Location: I/O Command Set specific. 0 = last 8 bytes of metadata; 1 = first 8 bytes of metadata."
+    },
+    "ses": {
+      "required": false,
+      "type": "uint3",
+      "cdw": "CDW10",
+      "bits": [11, 9],
+      "default": "0x0",
+      "desc": "Secure Erase Settings: 000b = no secure erase; 001b = User Data Erase; 010b = Cryptographic Erase; 011b-111b = Reserved."
+    }
+  },
+
+  "sq": {
+    "CDW10": {
+      "RSVD":  { "bits": [31, 14], "value": "0x0",   "desc": "Reserved" },
+      "LBAFU": { "bits": [13, 12], "value": "lbafu",  "desc": "LBA Format Upper (most significant 2 bits of Format Index)" },
+      "SES":   { "bits": [11, 9],  "value": "ses",    "desc": "Secure Erase Settings" },
+      "RSVD2": { "bits": [8, 9],   "value": "0x0",    "desc": "Reserved — PIL and PI are I/O Command Set specific" },
+      "PIL":   { "bits": [8, 8],   "value": "pil",    "desc": "Protection Information Location (I/O CS specific)" },
+      "PI":    { "bits": [7, 5],   "value": "pi",     "desc": "Protection Information (I/O CS specific)" },
+      "MSET":  { "bits": [4, 4],   "value": "mset",   "desc": "Metadata Settings (I/O CS specific)" },
+      "LBAFL": { "bits": [3, 0],   "value": "lbafl",  "desc": "LBA Format Lower (least significant 4 bits of Format Index)" }
+    },
+    "CDW11": "0x00000000",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+
+  "cq_prediction": {
+    "DWORD0": "0x00000000 (no command-specific result)",
+    "status_rules": [
+      {
+        "condition": "Command succeeds — valid format applied to the specified namespace",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid format specified (e.g. invalid User Data Format number, insufficient metadata resources, or format not available in current configuration)",
+        "SCT": "0x1",
+        "SC": "0x0A",
+        "meaning": "Invalid Format",
+        "DNR": true,
+        "note": "Figure 190, spec Section 5.14"
+      },
+      {
+        "condition": "I/O commands in progress on the affected namespace when Format NVM was submitted",
+        "SCT": "0x0",
+        "SC": "0x0C",
+        "meaning": "Command Sequence Error",
+        "DNR": false,
+        "note": "Figure 190. DNR=false — command may succeed if resubmitted after I/O quiesces."
+      },
+      {
+        "condition": "Format denied due to lack of access rights (security specification violation)",
+        "SCT": "0x1",
+        "SC": "0x15",
+        "meaning": "Operation Denied",
+        "DNR": true,
+        "note": "Figure 190, spec Section 5.14"
+      },
+      {
+        "condition": "Namespace is write protected",
+        "SCT": "0x1",
+        "SC": "0x20",
+        "meaning": "Namespace is Write Protected",
+        "DNR": true,
+        "note": "Figure 190, spec Section 5.14"
+      },
+      {
+        "condition": "Access to namespace or user data denied due to lack of access rights",
+        "SCT": "0x1",
+        "SC": "0x86",
+        "meaning": "Access Denied",
+        "DNR": true,
+        "note": "Figure 190, spec Section 5.14"
+      },
+      {
+        "condition": "NSID set to 0xFFFFFFFF but FNA bit 3 is set to 1 (broadcast NSID not supported)",
+        "SCT": "0x0",
+        "SC": "0x02",
+        "meaning": "Invalid Field in Command",
+        "DNR": true,
+        "note": "Section 5.14: controller shall abort if bit 3 of FNA is 1 and NSID=0xFFFFFFFF"
+      }
+    ]
+  },
+
+  "response": {
+    "type": "none",
+    "size_bytes": 0,
+    "note": "Format NVM has no data transfer. After successful completion, the new format settings are visible via Identify Namespace."
+  }
+}

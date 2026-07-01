@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "name": "Firmware Commit",
+    "aliases": [],
+    "opcode": "0x14",
+    "queue": "Admin",
+    "spec_ref": "Section 5.12",
+    "description": "Used to modify the firmware image or Boot Partitions."
+  },
+  "required_parameters": [
+    "cns"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "CNS": {
+      "required": true,
+      "type": "hex",
+      "cdw": "CDW10",
+      "bits": [
+        7,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Firmware Slot (FS) or Boot Partition ID (BPID)"
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "BootPartitionID": {
+        "bits": [
+          31,
+          6
+        ],
+        "value": "cns",
+        "desc": "Specifies the Boot Partition that shall be used for the Commit Action, if applicable."
+      },
+      "CommitAction": {
+        "bits": [
+          5,
+          3
+        ],
+        "value": "cns",
+        "desc": "This field specifies the action that is taken on the image downloaded with the Firmware Image Download command or on a previously downloaded and placed image."
+      },
+      "FirmwareSlot": {
+        "bits": [
+          2,
+          0
+        ],
+        "value": "cns",
+        "desc": "Specifies the firmware slot that shall be used for the Commit Action, if applicable. If the value specified is 0h, then the controller shall choose the firmware slot (i.e., slot 1 to slot 7) to use for the operation."
+      }
+    },
+    "CDW11": "0x00000000",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "command-specific description or 0x0",
+    "status_rules": [
+      {
+        "condition": "Command succeeds and no overlapping update detected",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Overlapping firmware/boot partition image update command sequence detected from Management Endpoint",
+        "SCT": "0x12",
+        "SC": "0x01",
+        "meaning": "Firmware Activation Requires Conventional Reset",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Overlapping firmware/boot partition image update command sequence detected from Admin Submission Queue on a controller",
+        "SCT": "0x12",
+        "SC": "0x00",
+        "meaning": "Firmware Activation Requires Conventional Reset",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Invalid Firmware Slot",
+        "SCT": "0x06",
+        "SC": "0x00",
+        "meaning": "Invalid Firmware Slot",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Firmware Image",
+        "SCT": "0x07",
+        "SC": "0x00",
+        "meaning": "Invalid Firmware Image",
+        "DNR": false
+      },
+      {
+        "condition": "Firmware Activation Requires Conventional Reset",
+        "SCT": "0x11",
+        "SC": "0x00",
+        "meaning": "Firmware Activation Requires Conventional Reset",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Firmware Activation Requires NVM Subsystem Reset",
+        "SCT": "0x12",
+        "SC": "0x02",
+        "meaning": "Firmware Activation Requires NVM Subsystem Reset",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Firmware Activation Requires Controller Level Reset",
+        "SCT": "0x12",
+        "SC": "0x03",
+        "meaning": "Firmware Activation Requires Controller Level Reset",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Firmware Activation Requires Maximum Time Violation",
+        "SCT": "0x12",
+        "SC": "0x04",
+        "meaning": "Firmware Activation Requires Maximum Time Violation",
+        "DNR": true,
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not explicitly stated in the text."
+      },
+      {
+        "condition": "Firmware Activation Prohibited",
+        "SCT": "0x13",
+        "SC": "0x00",
+        "meaning": "Firmware Activation Prohibited",
+        "DNR": false
+      },
+      {
+        "condition": "Overlapping Range",
+        "SCT": "0x14",
+        "SC": "0x00",
+        "meaning": "Overlapping Range",
+        "DNR": false
+      },
+      {
+        "condition": "Boot Partition Write Prohibited",
+        "SCT": "0x1E",
+        "SC": "0x00",
+        "meaning": "Boot Partition Write Prohibited",
+        "DNR": false
+      }
+    ]
+  },
+  "description": "The Firmware Commit command is used to modify the firmware image or Boot Partitions. It requires a CNS parameter and specifies actions such as committing changes at the next Controller Level Reset, activating immediately, etc."
+}

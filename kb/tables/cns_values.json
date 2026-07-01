@@ -1,0 +1,32 @@
+{
+  "description": "Identify CNS field values — NVMe Base Spec 2.0a, Figure 273",
+  "values": {
+    "0x00": { "name": "Identify Namespace",           "description": "Returns Identify Namespace data structure for NSID", "nsid_required": true,  "cntid_required": false },
+    "0x01": { "name": "Identify Controller",          "description": "Returns Identify Controller data structure",         "nsid_required": false, "cntid_required": false },
+    "0x02": { "name": "Active Namespace ID List",     "description": "Returns list of active NSID values > NSID field",   "nsid_required": false, "cntid_required": false },
+    "0x03": { "name": "Namespace ID Descriptor List", "description": "Returns Namespace Identification Descriptor list",   "nsid_required": true,  "cntid_required": false },
+    "0x04": { "name": "NVM Set List",                 "description": "Returns NVM Set list",                               "nsid_required": false, "cntid_required": false },
+    "0x05": { "name": "I/O Command Set specific Identify Namespace", "description": "Returns I/O CS Identify Namespace data structure", "nsid_required": true, "cntid_required": false },
+    "0x06": { "name": "I/O Command Set specific Identify Controller","description": "Returns I/O CS Identify Controller",   "nsid_required": false, "cntid_required": false },
+    "0x07": { "name": "I/O Command Set specific Active Namespace ID List","description": "Returns I/O CS active NSID list", "nsid_required": false, "cntid_required": false },
+    "0x08": { "name": "I/O Command Set independent Identify Namespace","description": "Returns I/O CS independent Identify Namespace", "nsid_required": true, "cntid_required": false },
+    "0x09": { "name": "Reserved", "description": "Reserved", "nsid_required": false, "cntid_required": false },
+    "0x10": { "name": "Allocated Namespace ID List",  "description": "Returns list of allocated NSID values > NSID",      "nsid_required": false, "cntid_required": false },
+    "0x11": { "name": "Identify Namespace (allocated)","description": "Returns Identify Namespace for allocated NSID",     "nsid_required": true,  "cntid_required": false },
+    "0x12": { "name": "Controller List (attached to NS)","description": "Returns list of controllers attached to NSID",    "nsid_required": true,  "cntid_required": true  },
+    "0x13": { "name": "Controller List (all in subsystem)","description": "Returns list of all controllers in subsystem",  "nsid_required": false, "cntid_required": true  },
+    "0x14": { "name": "Primary Controller Capabilities","description": "Returns Primary Controller Capabilities data structure","nsid_required": false, "cntid_required": true },
+    "0x15": { "name": "Secondary Controller List",    "description": "Returns Secondary Controller list",                 "nsid_required": false, "cntid_required": true  },
+    "0x16": { "name": "Namespace Granularity List",   "description": "Returns Namespace Granularity List",                "nsid_required": false, "cntid_required": false },
+    "0x17": { "name": "UUID List",                    "description": "Returns UUID List",                                 "nsid_required": false, "cntid_required": false },
+    "0x18": { "name": "Domain List",                  "description": "Returns Domain List",                               "nsid_required": false, "cntid_required": false },
+    "0x19": { "name": "Endurance Group List",         "description": "Returns Endurance Group List",                      "nsid_required": false, "cntid_required": false },
+    "0x1A": { "name": "I/O CS specific Identify Namespace (allocated)","description": "Returns I/O CS specific Identify Namespace for allocated NSID", "nsid_required": true, "cntid_required": false },
+    "0x1B": { "name": "I/O CS specific Allocated NS ID List","description": "Returns I/O CS specific allocated NSID list","nsid_required": false, "cntid_required": false },
+    "0x1C": { "name": "I/O Command Set List",         "description": "Returns I/O Command Set List",                      "nsid_required": false, "cntid_required": false }
+  },
+  "reserved_ranges": [
+    { "start": "0x09", "end": "0x0F", "description": "Reserved" },
+    { "start": "0x1D", "end": "0xFF", "description": "Reserved" }
+  ]
+}

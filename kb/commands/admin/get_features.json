@@ -1,0 +1,73 @@
+{
+  "_comment": "Schema every command KB file must conform to. Top-level keys sit directly at the root of the JSON object \u2014 there is NO wrapping 'command' key. This matches kb/commands/admin/identify.json exactly; use that file as a second, concrete reference alongside this schema.",
+  "meta": {
+    "name": "Get Features",
+    "aliases": [],
+    "opcode": "0x15",
+    "queue": "Admin",
+    "spec_ref": "Section 5.15",
+    "description": "Retrieves the attributes of the Feature specified."
+  },
+  "required_parameters": [
+    "feature_id"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "Feature_ID": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW10",
+      "bits": [
+        31,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Identifier of the feature to get"
+    }
+  },
+  "sq": {
+    "_comment": "Only include CDW10-CDW15 here (command-specific). CDW0-CDW9 are built automatically by 03_sq_builder.py from meta.opcode and resolved parameters \u2014 do not include them.",
+    "CDW10": {
+      "Feature_ID": {
+        "bits": [
+          31,
+          0
+        ],
+        "value": "Feature_ID",
+        "desc": "Identifier of the feature to get"
+      }
+    },
+    "CDW11": "0x00000000",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "command-specific description or 0x0",
+    "status_rules": [
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      }
+    ]
+  },
+  "response": {
+    "type": "prp",
+    "size_bytes": 4096,
+    "note": null,
+    "spec_ref": null,
+    "fields": {
+      "Feature_Attributes": {
+        "offset_bytes": 0,
+        "size_bytes": 8,
+        "desc": "Attributes of the feature"
+      }
+    },
+    "per_cns": null
+  }
+}

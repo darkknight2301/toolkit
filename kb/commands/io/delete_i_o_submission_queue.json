@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "name": "Delete I/O Submission Queue",
+    "aliases": [],
+    "opcode": "0x14",
+    "queue": "IO",
+    "spec_ref": "Section 5.7",
+    "description": "Used to delete an I/O Submission Queue."
+  },
+  "required_parameters": [
+    "qid"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "QID": {
+      "required": true,
+      "type": "uint16",
+      "cdw": "CDW10",
+      "bits": [
+        15,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Queue Identifier (QID) of the Submission Queue to be deleted."
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "QUEUE_IDENTIFIER": {
+        "bits": [
+          15,
+          0
+        ],
+        "value": "qid",
+        "desc": "Queue Identifier (QID)"
+      }
+    },
+    "CDW11": "0x00000000",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "Indicates the status of the command.",
+    "status_rules": [
+      {
+        "condition": "Invalid Queue Identifier: The Queue Identifier specified in the command is invalid. This error is also indicated if the Admin Submission Queue identifier is specified.",
+        "SCT": "1h",
+        "SC": "0x80",
+        "meaning": "Invalid Queue Identifier",
+        "_uncertain": true,
+        "_uncertain_reason": "The exact SCT and SC values are not provided in the text."
+      },
+      {
+        "condition": "All commands submitted to the indicated I/O Submission Queue are either completed or aborted.",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion"
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4,
+    "note": null,
+    "fields": {},
+    "per_cns": {}
+  }
+}

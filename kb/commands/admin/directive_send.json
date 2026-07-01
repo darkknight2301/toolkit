@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "name": "Directive Send",
+    "aliases": [],
+    "opcode": "0x15",
+    "queue": "Admin",
+    "spec_ref": "Section 5.11",
+    "description": "Transfers a data buffer dependent on the Directive Type to the controller."
+  },
+  "required_parameters": [
+    "cns"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "CNS": {
+      "required": true,
+      "type": "hex",
+      "cdw": "CDW10",
+      "bits": [
+        7,
+        0
+      ],
+      "default": null,
+      "valid_ref": "Figure 416",
+      "desc": "Command Specific Name (CNS) - specifies the Directive Type"
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "FIELD_NAME": {
+        "bits": [
+          7,
+          0
+        ],
+        "value": "cns",
+        "desc": "Command Specific Name (CNS)"
+      }
+    },
+    "CDW11": "0x00000000",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "command-specific description or 0x0",
+    "status_rules": [
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "_uncertain": true,
+        "_uncertain_reason": "The exact status codes for different Directive Types are not specified in the text."
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4096,
+    "note": null,
+    "fields": {},
+    "per_cns": {}
+  }
+}

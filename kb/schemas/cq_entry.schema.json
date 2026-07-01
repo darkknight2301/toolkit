@@ -1,0 +1,26 @@
+{
+  "description": "NVMe Completion Queue Entry schema — 16 bytes total",
+  "fields": {
+    "DWORD0": { "bits": 32, "description": "Command-specific result" },
+    "DWORD1": { "bits": 32, "description": "Reserved" },
+    "DWORD2": {
+      "bits": 32,
+      "subfields": {
+        "SQHD": { "bits": [15, 0],  "description": "SQ Head Pointer" },
+        "SQID": { "bits": [31, 16], "description": "SQ Identifier" }
+      }
+    },
+    "DWORD3": {
+      "bits": 32,
+      "subfields": {
+        "CID":  { "bits": [15, 0],  "description": "Command Identifier" },
+        "P":    { "bits": [16, 16], "description": "Phase Tag" },
+        "SC":   { "bits": [24, 17], "description": "Status Code" },
+        "SCT":  { "bits": [27, 25], "description": "Status Code Type" },
+        "CRD":  { "bits": [29, 28], "description": "Command Retry Delay" },
+        "M":    { "bits": [30, 30], "description": "More" },
+        "DNR":  { "bits": [31, 31], "description": "Do Not Retry" }
+      }
+    }
+  }
+}

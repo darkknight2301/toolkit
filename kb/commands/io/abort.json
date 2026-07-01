@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "name": "Abort",
+    "aliases": [],
+    "opcode": "0x04",
+    "queue": "Admin | IO",
+    "spec_ref": "Section 5.17",
+    "description": "Used to abort a specific command previously submitted to the Admin Submission Queue or an I/O Submission Queue."
+  },
+  "required_parameters": [
+    "sqid",
+    "cid"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "SQID": {
+      "required": true,
+      "type": "uint16",
+      "cdw": "CDW10",
+      "bits": [
+        31,
+        16
+      ],
+      "desc": "Submission Queue Identifier (SQID)"
+    },
+    "CID": {
+      "required": true,
+      "type": "uint16",
+      "cdw": "CDW10",
+      "bits": [
+        15,
+        0
+      ],
+      "desc": "Command Identifier (CID)"
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "SQID": {
+        "bits": [
+          31,
+          16
+        ],
+        "value": "cid",
+        "desc": "Submission Queue Identifier"
+      },
+      "CID": {
+        "bits": [
+          15,
+          0
+        ],
+        "value": "sqid",
+        "desc": "Command Identifier"
+      }
+    }
+  },
+  "cq_prediction": {
+    "DWORD0": "Indicates the status for the Abort command and whether the command to abort was aborted.",
+    "status_rules": [
+      {
+        "condition": "The command to abort was successfully aborted",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Abort Command Limit Exceeded",
+        "SCT": "0x3",
+        "SC": "0x03",
+        "meaning": "Abort Command Limit Exceeded",
+        "DNR": true
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4,
+    "fields": {
+      "Status": {
+        "offset_bytes": 0,
+        "size_bytes": 1,
+        "desc": "Command specific status value"
+      }
+    }
+  }
+}

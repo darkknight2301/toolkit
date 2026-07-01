@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "name": "Create I/O Completion Queue",
+    "aliases": [],
+    "opcode": "0x14",
+    "queue": "IO",
+    "spec_ref": "Section 5.4",
+    "description": "Used to create all I/O Completion Queues with the exception of the Admin Completion Queue."
+  },
+  "required_parameters": [
+    "qsize",
+    "qid"
+  ],
+  "optional_parameters": [
+    "prp1",
+    "iv",
+    "ien",
+    "pc"
+  ],
+  "parameters": {
+    "QSIZE": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW10",
+      "bits": [
+        31,
+        16
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the size of the Completion Queue to be created."
+    },
+    "QID": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW10",
+      "bits": [
+        15,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the identifier to assign to the Completion Queue to be created."
+    },
+    "PRP1": {
+      "required": false,
+      "type": "hex",
+      "cdw": "CDW11",
+      "bits": [
+        63,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "If CDW11.PC is set to \u20181\u2019, then this field specifies a 64-bit base memory address pointer of the Completion Queue that is physically contiguous. If CDW11.PC is cleared to \u20180\u2019, then this field specifies a PRP List pointer."
+    },
+    "IV": {
+      "required": false,
+      "type": "hex",
+      "cdw": "CDW11",
+      "bits": [
+        31,
+        16
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Value is transport specific and is described in the applicable NVMe Transport binding specification if required. If not defined by the transport, then this field shall be cleared to 0h."
+    },
+    "IEN": {
+      "required": false,
+      "type": "bool",
+      "cdw": "CDW11",
+      "bits": [
+        15,
+        2
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "If set to \u20181\u2019, then interrupts are enabled for this Completion Queue. If cleared to \u20180\u2019, then interrupts are disabled for this Completion Queue."
+    },
+    "PC": {
+      "required": false,
+      "type": "bool",
+      "cdw": "CDW11",
+      "bits": [
+        1,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "If set to \u20181\u2019, then the Completion Queue is physically contiguous and PRP Entry 1 (PRP1) is the address of a contiguous physical buffer. If cleared to \u20180\u2019, then the Completion Queue is not physically contiguous and PRP Entry 1 (PRP1) is a PRP List pointer."
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "QSIZE": {
+        "bits": [
+          31,
+          16
+        ],
+        "value": "qsize",
+        "desc": "Indicates the size of the Completion Queue to be created."
+      },
+      "QID": {
+        "bits": [
+          15,
+          0
+        ],
+        "value": "qid",
+        "desc": "Indicates the identifier to assign to the Completion Queue to be created."
+      }
+    },
+    "CDW11": {
+      "PRP1": {
+        "bits": [
+          63,
+          0
+        ],
+        "value": "prp1",
+        "desc": "If CDW11.PC is set to \u20181\u2019, then this field specifies a 64-bit base memory address pointer of the Completion Queue that is physically contiguous. If CDW11.PC is cleared to \u20180\u2019, then this field specifies a PRP List pointer."
+      },
+      "IV": {
+        "bits": [
+          31,
+          16
+        ],
+        "value": "iv",
+        "desc": "Value is transport specific and is described in the applicable NVMe Transport binding specification if required. If not defined by the transport, then this field shall be cleared to 0h."
+      },
+      "IEN": {
+        "bits": [
+          15,
+          2
+        ],
+        "value": "ien",
+        "desc": "If set to \u20181\u2019, then interrupts are enabled for this Completion Queue. If cleared to \u20180\u2019, then interrupts are disabled for this Completion Queue."
+      },
+      "PC": {
+        "bits": [
+          1,
+          0
+        ],
+        "value": "pc",
+        "desc": "If set to \u20181\u2019, then the Completion Queue is physically contiguous and PRP Entry 1 (PRP1) is the address of a contiguous physical buffer. If cleared to \u20180\u2019, then the Completion Queue is not physically contiguous and PRP Entry 1 (PRP1) is a PRP List pointer."
+      }
+    },
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "Command Completion",
+    "status_rules": [
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command.",
+        "SCT": "0x1",
+        "SC": "0x01",
+        "meaning": "Invalid Queue Identifier",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Queue Size: The host attempted to create an I/O Completion Queue with a number of entries that is invalid (e.g., 0h or exceeds the maximum supported by the controller).",
+        "SCT": "0x2",
+        "SC": "0x02",
+        "meaning": "Invalid Queue Size",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Interrupt Vector: The creation of the I/O Completion Queue failed due to an invalid interrupt vector specified as part of the command.",
+        "SCT": "0x8",
+        "SC": "0x08",
+        "meaning": "Invalid Interrupt Vector",
+        "DNR": false
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4096,
+    "note": null,
+    "spec_ref": null,
+    "fields": {},
+    "per_cns": {}
+  }
+}

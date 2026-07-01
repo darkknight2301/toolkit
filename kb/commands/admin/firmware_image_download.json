@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "name": "Firmware Image Download",
+    "aliases": [],
+    "opcode": "0x1C",
+    "queue": "Admin",
+    "spec_ref": "Section 5.13",
+    "description": "Used to download all or a portion of an image for a future update to the controller."
+  },
+  "required_parameters": [
+    "numd",
+    "ofst"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "numd": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "Command Dword 10",
+      "bits": [
+        31,
+        0
+      ],
+      "desc": "Number of dwords to transfer for this portion of the firmware."
+    },
+    "ofst": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "Command Dword 11",
+      "bits": [
+        31,
+        0
+      ],
+      "desc": "Offset from the start of the firmware image being downloaded to the controller."
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "numd": {
+        "bits": [
+          31,
+          0
+        ],
+        "value": "numd",
+        "desc": "Number of dwords to transfer for this portion of the firmware."
+      }
+    },
+    "CDW11": {
+      "ofst": {
+        "bits": [
+          31,
+          0
+        ],
+        "value": "ofst",
+        "desc": "Offset from the start of the firmware image being downloaded to the controller."
+      }
+    },
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "0x0",
+    "status_rules": [
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Overlapping Range detected",
+        "SCT": "0x14",
+        "SC": "0x00",
+        "meaning": "Indicates overlapping firmware image ranges.",
+        "_uncertain": true,
+        "_uncertain_reason": "The exact status code for this condition is not explicitly stated."
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4096,
+    "note": "",
+    "fields": {},
+    "per_cns": {}
+  }
+}

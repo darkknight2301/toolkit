@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "name":        "Identify",
+    "aliases":     ["identify", "identify controller", "identify namespace"],
+    "opcode":      "0x06",
+    "queue":       "Admin",
+    "spec_ref":    "NVMe Base Spec 2.0a, Section 5.17",
+    "description": "Returns a data buffer containing specified identification information"
+  },
+
+  "required_parameters": ["cns"],
+  "optional_parameters": ["nsid", "cntid", "csi", "uuid_index"],
+
+  "parameters": {
+    "cns": {
+      "required": true,
+      "type": "hex",
+      "cdw": "CDW10",
+      "bits": [7, 0],
+      "valid_ref": "cns_values",
+      "desc": "Controller or Namespace Structure — selects what to identify"
+    },
+    "nsid": {
+      "required": false,
+      "type": "uint32",
+      "cdw": "CDW1",
+      "default": "0xffffffff",
+      "desc": "Namespace ID — required for NS-specific CNS values"
+    },
+    "cntid": {
+      "required": false,
+      "type": "uint16",
+      "cdw": "CDW10",
+      "bits": [31, 16],
+      "default": "0x0000",
+      "desc": "Controller ID — required for controller-list CNS values"
+    },
+    "csi": {
+      "required": false,
+      "type": "uint8",
+      "cdw": "CDW11",
+      "bits": [31, 24],
+      "default": "0x00",
+      "desc": "Command Set Identifier"
+    },
+    "uuid_index": {
+      "required": false,
+      "type": "uint7",
+      "cdw": "CDW14",
+      "bits": [6, 0],
+      "default": "0x00",
+      "desc": "UUID Index — 0 = no UUID"
+    }
+  },
+
+  "sq": {
+    "CDW0": {
+      "FUSE": "0x0",
+      "PSDT": "0x0"
+    },
+    "CDW10": {
+      "CNTID": { "bits": [31, 16], "value": "cntid",  "desc": "Controller ID" },
+      "RSVD":  { "bits": [15, 8],  "value": "0x00",   "desc": "Reserved" },
+      "CNS":   { "bits": [7, 0],   "value": "cns",    "desc": "Controller or Namespace Structure" }
+    },
+    "CDW11": {
+      "CSI":      { "bits": [31, 24], "value": "csi",     "desc": "Command Set Identifier" },
+      "RSVD":     { "bits": [23, 16], "value": "0x00",    "desc": "Reserved" },
+      "NVMSETID": { "bits": [15, 0],  "value": "0x0000",  "desc": "NVM Set Identifier" }
+    },
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": {
+      "RSVD":       { "bits": [31, 7], "value": "0x000000", "desc": "Reserved" },
+      "UUID_INDEX": { "bits": [6, 0],  "value": "uuid_index", "desc": "UUID Index" }
+    },
+    "CDW15": "0x00000000"
+  },
+
+  "cq_prediction": {
+    "DWORD0": "Command specific (0 for Identify)",
+    "status_rules": [
+      {
+        "condition": "CNS value is reserved",
+        "SCT": "0x0",
+        "SC":  "0x02",
+        "meaning": "Invalid Field in Command",
+        "DNR": true,
+        "note": "CNS value falls in a reserved range per cns_values table."
+      },
+      {
+        "condition": "NSID is 0x0 or invalid when CNS requires a valid NSID",
+        "SCT": "0x0",
+        "SC":  "0x0B",
+        "meaning": "Invalid Namespace or Format",
+        "DNR": true,
+        "note": "Selected CNS value requires a valid, non-broadcast NSID."
+      },
+      {
+        "condition": "CNS value is valid",
+        "SCT": "0x0",
+        "SC":  "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      }
+    ]
+  },
+
+  "response": {
+    "type": "dma_buffer",
+    "size_bytes": 4096,
+    "note": "Identify always returns a 4096-byte data buffer for valid CNS values.",
+    "per_cns": {
+      "0x01": {
+        "desc": "Identify Controller Data Structure",
+        "spec_ref": "NVMe Base Spec 2.0a, Figure 275",
+        "fields": {
+          "VID":    { "offset_bytes": 0,   "size_bytes": 2,  "desc": "PCI Vendor ID" },
+          "SSVID":  { "offset_bytes": 2,   "size_bytes": 2,  "desc": "PCI Subsystem Vendor ID" },
+          "SN":     { "offset_bytes": 4,   "size_bytes": 20, "desc": "Serial Number (ASCII, space-padded)" },
+          "MN":     { "offset_bytes": 24,  "size_bytes": 40, "desc": "Model Number (ASCII, space-padded)" },
+          "FR":     { "offset_bytes": 64,  "size_bytes": 8,  "desc": "Firmware Revision (ASCII)" },
+          "RAB":    { "offset_bytes": 72,  "size_bytes": 1,  "desc": "Recommended Arbitration Burst" },
+          "IEEE":   { "offset_bytes": 73,  "size_bytes": 3,  "desc": "IEEE OUI Identifier" },
+          "CMIC":   { "offset_bytes": 76,  "size_bytes": 1,  "desc": "Controller Multi-Path I/O and NS Sharing Capabilities" },
+          "MDTS":   { "offset_bytes": 77,  "size_bytes": 1,  "desc": "Maximum Data Transfer Size" },
+          "CNTLID": { "offset_bytes": 78,  "size_bytes": 2,  "desc": "Controller ID" },
+          "VER":    { "offset_bytes": 80,  "size_bytes": 4,  "desc": "NVMe Version" },
+          "OACS":   { "offset_bytes": 256, "size_bytes": 2,  "desc": "Optional Admin Command Support" },
+          "FRMW":   { "offset_bytes": 259, "size_bytes": 1,  "desc": "Firmware Updates bitmask" },
+          "LPA":    { "offset_bytes": 260, "size_bytes": 1,  "desc": "Log Page Attributes" },
+          "ELPE":   { "offset_bytes": 261, "size_bytes": 1,  "desc": "Error Log Page Entries (0-based)" },
+          "NPSS":   { "offset_bytes": 262, "size_bytes": 1,  "desc": "Number of Power States Supported (0-based)" },
+          "SQES":   { "offset_bytes": 512, "size_bytes": 1,  "desc": "SQ Entry Size (min[3:0], max[7:4])" },
+          "CQES":   { "offset_bytes": 513, "size_bytes": 1,  "desc": "CQ Entry Size (min[3:0], max[7:4])" },
+          "MAXCMD": { "offset_bytes": 514, "size_bytes": 2,  "desc": "Maximum Outstanding Commands" },
+          "NN":     { "offset_bytes": 516, "size_bytes": 4,  "desc": "Number of Namespaces" },
+          "ONCS":   { "offset_bytes": 520, "size_bytes": 2,  "desc": "Optional NVM Command Support" }
+        }
+      },
+      "0x00": {
+        "desc": "Identify Namespace Data Structure",
+        "spec_ref": "NVMe Base Spec 2.0a, Figure 245",
+        "fields": {
+          "NSZE":   { "offset_bytes": 0,   "size_bytes": 8,  "desc": "Namespace Size in logical blocks" },
+          "NCAP":   { "offset_bytes": 8,   "size_bytes": 8,  "desc": "Namespace Capacity in logical blocks" },
+          "NUSE":   { "offset_bytes": 16,  "size_bytes": 8,  "desc": "Namespace Utilization in logical blocks" },
+          "NSFEAT": { "offset_bytes": 24,  "size_bytes": 1,  "desc": "Namespace Features bitmask" },
+          "NLBAF":  { "offset_bytes": 25,  "size_bytes": 1,  "desc": "Number of LBA Formats (0-based)" },
+          "FLBAS":  { "offset_bytes": 26,  "size_bytes": 1,  "desc": "Formatted LBA Size — current format index" },
+          "LBAF":   { "offset_bytes": 128, "size_bytes": 64, "desc": "LBA Format Support array (16 x 4 bytes)" }
+        }
+      }
+    }
+  }
+}

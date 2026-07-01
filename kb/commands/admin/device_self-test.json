@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "name": "Device Self-test",
+    "aliases": [],
+    "opcode": "0x98",
+    "queue": "Admin",
+    "spec_ref": "Section 5.9",
+    "description": "Starts or aborts a device self-test operation"
+  },
+  "required_parameters": [
+    "cns"
+  ],
+  "optional_parameters": [],
+  "parameters": {
+    "CNS": {
+      "required": true,
+      "type": "hex",
+      "cdw": "CDW10",
+      "bits": [
+        7,
+        0
+      ],
+      "default": null,
+      "valid_ref": "Figure 170",
+      "desc": "Namespace Identifier"
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "STC": {
+        "bits": [
+          31,
+          0
+        ],
+        "value": "0x0 to 0xF",
+        "_uncertain": true,
+        "_uncertain_reason": "The exact value of STC is not specified in the text."
+      },
+      "desc": "Self-test Code"
+    }
+  },
+  "cq_prediction": {
+    "DWORD0": "1Dh - Device Self-test in Progress",
+    "status_rules": [
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      },
+      {
+        "condition": "Device Self-test in Progress",
+        "SCT": "0x1D",
+        "SC": "0x00",
+        "meaning": "The controller or NVM subsystem already has a device self-test operation in process.",
+        "DNR": true
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": 4096,
+    "note": null,
+    "spec_ref": null,
+    "fields": {},
+    "per_cns": {}
+  }
+}

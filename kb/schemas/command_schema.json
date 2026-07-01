@@ -1,0 +1,74 @@
+{
+  "_comment": "Schema every command KB file must conform to. Top-level keys sit directly at the root of the JSON object — there is NO wrapping 'command' key. This matches kb/commands/admin/identify.json exactly; use that file as a second, concrete reference alongside this schema.",
+  "meta": {
+    "name":        "string — human name e.g. Identify",
+    "aliases":     ["list of natural-language aliases, lowercase"],
+    "opcode":      "hex string e.g. 0x06",
+    "queue":       "Admin | IO",
+    "spec_ref":    "section reference e.g. Section 5.17",
+    "description": "one-line description"
+  },
+  "required_parameters": ["list of parameter name strings that MUST be present, e.g. \"cns\""],
+  "optional_parameters":  ["list of parameter name strings that are optional"],
+  "parameters": {
+    "PARAM_NAME": {
+      "required":  true,
+      "type":      "hex | uint8 | uint16 | uint32 | uint64 | bool",
+      "cdw":       "CDW10",
+      "bits":      [7, 0],
+      "default":   "optional — fixed default value if this parameter is optional",
+      "valid_ref": "optional — table name in kb/tables/ for valid value lookup",
+      "desc":      "what this parameter means"
+    }
+  },
+  "sq": {
+    "_comment": "Only include CDW10-CDW15 here (command-specific). CDW0-CDW9 are built automatically by 03_sq_builder.py from meta.opcode and resolved parameters — do not include them.",
+    "CDW10": {
+      "FIELD_NAME": {
+        "bits":  [7, 0],
+        "value": "a parameter name from 'parameters' above (e.g. \"cns\"), or a fixed hex string like \"0x00\"",
+        "desc":  "field description"
+      }
+    },
+    "CDW11": "0x00000000 — use a plain hex string instead of an object for CDWs with no named fields",
+    "CDW12": "0x00000000",
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "command-specific description or 0x0",
+    "status_rules": [
+      {
+        "condition": "human-readable condition, e.g. 'Command succeeds'",
+        "SCT": "0x0",
+        "SC":  "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      }
+    ]
+  },
+  "response": {
+    "type":         "none | dma_buffer | prp",
+    "size_bytes":   4096,
+    "note":         "optional general note about the response",
+    "spec_ref":     "optional — Figure or Table reference",
+    "fields": {
+      "FIELD_NAME": {
+        "offset_bytes": 0,
+        "size_bytes":   2,
+        "desc":         "field description"
+      }
+    },
+    "per_cns": {
+      "_comment": "OPTIONAL — only used when the response structure varies by a selector field like CNS. If present, use this instead of the flat 'fields' key above. Keys are the selector's hex value, e.g. \"0x01\".",
+      "0x01": {
+        "desc": "description of this variant's response structure",
+        "spec_ref": "optional",
+        "fields": {
+          "FIELD_NAME": { "offset_bytes": 0, "size_bytes": 2, "desc": "field description" }
+        }
+      }
+    }
+  }
+}

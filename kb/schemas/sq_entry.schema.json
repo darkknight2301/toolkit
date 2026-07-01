@@ -1,0 +1,30 @@
+{
+  "description": "NVMe Submission Queue Entry schema — CDW0 through CDW15 (64 bytes total)",
+  "fields": {
+    "CDW0": {
+      "bits": 32,
+      "subfields": {
+        "OPC":  { "bits": [7,  0],  "description": "Opcode" },
+        "FUSE": { "bits": [9,  8],  "description": "Fused Operation (00=Normal)" },
+        "RSVD": { "bits": [13, 10], "description": "Reserved" },
+        "PSDT": { "bits": [15, 14], "description": "PRP or SGL for Data Transfer" },
+        "CID":  { "bits": [31, 16], "description": "Command Identifier" }
+      }
+    },
+    "CDW1":  { "bits": 32, "description": "Namespace Identifier (NSID)" },
+    "CDW2":  { "bits": 32, "description": "Reserved" },
+    "CDW3":  { "bits": 32, "description": "Reserved" },
+    "CDW4":  { "bits": 32, "description": "Metadata Pointer (MPTR) lower 32 bits" },
+    "CDW5":  { "bits": 32, "description": "Metadata Pointer (MPTR) upper 32 bits" },
+    "CDW6":  { "bits": 32, "description": "PRP Entry 1 (PRP1) lower 32 bits" },
+    "CDW7":  { "bits": 32, "description": "PRP Entry 1 (PRP1) upper 32 bits" },
+    "CDW8":  { "bits": 32, "description": "PRP Entry 2 (PRP2) lower 32 bits" },
+    "CDW9":  { "bits": 32, "description": "PRP Entry 2 (PRP2) upper 32 bits" },
+    "CDW10": { "bits": 32, "description": "Command-specific (see per-command schema)" },
+    "CDW11": { "bits": 32, "description": "Command-specific" },
+    "CDW12": { "bits": 32, "description": "Command-specific" },
+    "CDW13": { "bits": 32, "description": "Command-specific" },
+    "CDW14": { "bits": 32, "description": "Command-specific" },
+    "CDW15": { "bits": 32, "description": "Command-specific" }
+  }
+}

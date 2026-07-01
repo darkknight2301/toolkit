@@ -1,0 +1,27 @@
+---
+references:
+  - "File: /new/run.py"
+generationTime: 2026-07-01T08:17:14.492Z
+---
+flowchart TD
+    A["Start Script"] --> B["Parse Arguments"]
+    B -->|Query Provided| C["Run Main Function"]
+    B -->|No Query| D["Exit with Error"]
+    C --> E["Load Pipeline Stages"]
+    E --> F["Stage 1: Parse Intent"]
+    F --> G{"Intent Valid?"}
+    G -->|No| H["Format Error Output"]
+    G -->|Yes| I["Stage 2: Check Parameters"]
+    I --> J{"Parameters Valid?"}
+    J -->|Not Found| K["Format Command Not Found"]
+    J -->|Invalid| L["Format Invalid Parameters"]
+    J -->|Missing| M["Format Clarification Request"]
+    J -->|Valid| N["Stage 3: Build SQ Entry"]
+    N --> O["Stage 4: Predict CQ Entry"]
+    O --> P["Stage 5: Format Final Output"]
+    P --> Q["Return Result"]
+    H --> Q
+    K --> Q
+    L --> Q
+    M --> Q
+    D --> Q

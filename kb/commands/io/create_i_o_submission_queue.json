@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "name": "Create I/O Submission Queue",
+    "aliases": [],
+    "opcode": "0x157",
+    "queue": "IO",
+    "spec_ref": "Figure 158, Figure 159, Figure 160, Figure 161, Figure 162",
+    "description": "Creates an I/O Submission Queue"
+  },
+  "required_parameters": [],
+  "optional_parameters": [],
+  "parameters": {
+    "QSIZE": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW10",
+      "bits": [
+        31,
+        16
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the size of the Submission Queue to be created"
+    },
+    "QID": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW10",
+      "bits": [
+        15,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the identifier to assign to the Submission Queue"
+    },
+    "CQID": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW11",
+      "bits": [
+        31,
+        16
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the identifier of the I/O Completion Queue to utilize"
+    },
+    "QPRIO": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW11",
+      "bits": [
+        0,
+        2
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the priority class to use for commands within this Submission Queue"
+    },
+    "PC": {
+      "required": true,
+      "type": "bool",
+      "cdw": "CDW11",
+      "bits": [
+        31,
+        31
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "If set to \u20181\u2019, then the Submission Queue is physically contiguous"
+    },
+    "NVMSETID": {
+      "required": true,
+      "type": "uint32",
+      "cdw": "CDW12",
+      "bits": [
+        15,
+        0
+      ],
+      "default": null,
+      "valid_ref": null,
+      "desc": "Indicates the identifier of the NVM Set to be associated with this Submission Queue"
+    }
+  },
+  "sq": {
+    "CDW10": {
+      "QSIZE": {
+        "bits": [
+          31,
+          16
+        ],
+        "value": "QSIZE",
+        "desc": "Indicates the size of the Submission Queue to be created"
+      },
+      "QID": {
+        "bits": [
+          15,
+          0
+        ],
+        "value": "QID",
+        "desc": "Indicates the identifier to assign to the Submission Queue"
+      }
+    },
+    "CDW11": {
+      "CQID": {
+        "bits": [
+          31,
+          16
+        ],
+        "value": "CQID",
+        "desc": "Indicates the identifier of the I/O Completion Queue to utilize"
+      },
+      "QPRIO": {
+        "bits": [
+          0,
+          2
+        ],
+        "value": "QPRIO",
+        "desc": "Indicates the priority class to use for commands within this Submission Queue"
+      },
+      "PC": {
+        "bits": [
+          31,
+          31
+        ],
+        "value": "PC",
+        "desc": "If set to \u20181\u2019, then the Submission Queue is physically contiguous"
+      }
+    },
+    "CDW12": {
+      "NVMSETID": {
+        "bits": [
+          15,
+          0
+        ],
+        "value": "NVMSETID",
+        "desc": "Indicates the identifier of the NVM Set to be associated with this Submission Queue"
+      }
+    },
+    "CDW13": "0x00000000",
+    "CDW14": "0x00000000",
+    "CDW15": "0x00000000"
+  },
+  "cq_prediction": {
+    "DWORD0": "Completion Queue Invalid: The Completion Queue identifier specified in the command has not been created. | Invalid Queue Identifier: The creation of the I/O Submission Queue failed due to an invalid queue identifier specified as part of the command. An invalid queue identifier is one that identifies the Admin Queue (i.e., 0h), is outside the range supported by the controller, or is a Submission Queue Identifier that is already in use. | Invalid Queue Size: The host attempted to create an I/O Submission Queue with an invalid number of entries (e.g., a value of 0h or a value which exceeds the maximum supported by the controller, specified in CAP.MQES); or before initializing the CC.IOSQES field.",
+    "status_rules": [
+      {
+        "condition": "Completion Queue Invalid",
+        "SCT": "0x1",
+        "SC": "0x01",
+        "meaning": "The Completion Queue identifier specified in the command has not been created.",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Queue Identifier",
+        "SCT": "0x2",
+        "SC": "0x02",
+        "meaning": "The creation of the I/O Submission Queue failed due to an invalid queue identifier specified as part of the command. An invalid queue identifier is one that identifies the Admin Queue (i.e., 0h), is outside the range supported by the controller, or is a Submission Queue Identifier that is already in use.",
+        "DNR": false
+      },
+      {
+        "condition": "Invalid Queue Size",
+        "SCT": "0x3",
+        "SC": "0x03",
+        "meaning": "The host attempted to create an I/O Submission Queue with an invalid number of entries (e.g., a value of 0h or a value which exceeds the maximum supported by the controller, specified in CAP.MQES); or before initializing the CC.IOSQES field.",
+        "DNR": false
+      },
+      {
+        "condition": "Command succeeds",
+        "SCT": "0x0",
+        "SC": "0x00",
+        "meaning": "Successful Completion",
+        "DNR": false
+      }
+    ]
+  },
+  "response": {
+    "type": "none",
+    "size_bytes": null,
+    "valid_ref": null,
+    "desc": null
+  }
+}

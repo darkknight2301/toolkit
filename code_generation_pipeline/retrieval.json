@@ -1,0 +1,29 @@
+{
+  "query": "Step 4: Execute power cycle for prime number iterations.",
+  "primary_matches": [
+    {
+      "file": "power_cycle.hpp",
+      "class": null,
+      "name": "power_cycle"
+    },
+    {
+      "file": "power_cycle.hpp",
+      "class": null,
+      "name": "power_cycle"
+    }
+  ],
+  "context_chunks": [
+    {
+      "kind": "function_decl",
+      "name": "power_cycle",
+      "parent_class": null,
+      "namespace": "nvmeutil",
+      "class": null,
+      "file": "power_cycle.hpp",
+      "signature": "void power_cycle(ssdcommon::PowRelay& relay)",
+      "doc_comment": null,
+      "body": null,
+      "calls": []
+    }
+  ]
+}

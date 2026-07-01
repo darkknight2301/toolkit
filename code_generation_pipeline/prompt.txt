@@ -1,0 +1,86 @@
+You are an assistant helping incrementally build a single C++ test
+function, one step at a time, across multiple separate requests.
+
+Rules:
+- Use ONLY the functions, classes, and signatures shown in CONTEXT below.
+- Never invent a class, function, helper, or macro not shown in CONTEXT.
+- Look at EXISTING IMPLEMENTATION to see what variables/objects already
+  exist from previous steps. Reuse them -- do not redeclare or recreate
+  anything already present.
+- Output ONLY the code fragment for the CURRENTLY REQUESTED STEP.
+  Do not repeat previous steps. Do not output the function signature,
+  braces, includes, or any step other than the one requested.
+- Do not wrap the fragment in commentary -- just the C++ statements for
+  this one step, ready to insert as-is.
+- If the requested step cannot be implemented with what's in CONTEXT,
+  say so explicitly instead of guessing.
+
+
+TEST CASE: 
+FUNCTION: VerifyIdentifyContro
+STEPS COMPLETED SO FAR: 1, 2, 3, 4
+CURRENTLY REQUESTED STEP: 5
+
+EXISTING IMPLEMENTATION (do not regenerate any of this -- reuse its
+variables/objects where relevant):
+
+```cpp
+// Test Case: (not specified)
+// Function: VerifyIdentifyContro
+
+void VerifyIdentifyContro()
+{
+    // ---- Step 2 ----
+    ctrl.identify();
+    // ---- End Step 2 ----
+
+    // ---- Step 1 ----
+    submit_xferin(1, AdminOpcode(6), 0, 0, 0, 0, 0, 0, 0, 1024, new uint8_t[1024], 0);
+    // ---- End Step 1 ----
+    // ---- Step 3 ----
+    for (int i = 0; i < 10; ++i) {
+        // ---- Step 1 ----
+        submit_xferin(1, AdminOpcode(6), 0, 0, 0, 0, 0, 0, 0, 1024, new uint8_t[1024], 0);
+        // ---- End Step 1 ----
+
+        // ---- Step 2 ----
+        ctrl.identify();
+        // ---- End Step 2 ----
+
+        // Initialize UART object
+        MockUart uart;
+
+        // Open UART connection
+        uart.open();
+
+        // Execute UART command to check sanity
+        uint8_t response[1024];
+        int bytesRead = uart.read(response, sizeof(response));
+        if (bytesRead < 0) {
+            std::cerr << "[MockUart] Error reading from UART." << std::endl;
+        } else {
+            std::cout << "[MockUart] Read " << bytesRead << " bytes from UART." << std::endl;
+        }
+    }
+    // ---- End Step 3 ----
+
+    // ---- Step 4 ----
+    if (i % 2 == 0) {
+        power_cycle(relay);
+    }
+    // ---- End Step 4 ----
+}
+
+```
+
+CONTEXT (retrieved from the real codebase -- this is the ONLY source of truth):
+
+// power_cycle.hpp | namespace nvmeutil
+void power_cycle(ssdcommon::PowRelay& relay)
+// (declaration only -- no body available in this context)
+
+---
+
+USER REQUEST:
+Step 4: Execute power cycle for prime number iterations.
+

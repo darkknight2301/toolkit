@@ -1,0 +1,156 @@
+flowchart TD
+
+    START([Jenkins Job Start])
+
+    subgraph UI["UI / Jenkins Build Parameters"]
+        PRODUCT["Product"]
+        HOSTS["HostsForSelection"]
+        REDMINE["RedmineApiKey"]
+
+        TESTRAIL_CREDS["TestRailCredentials"]
+        CONFIG["Configuration<br/>Default dictionary values"]
+        COMMON_INPUT["CommonTP Input<br/>Build Macros<br/>Environment Variables"]
+        MAPPING_PATH["Mapping Path"]
+        TESTRAIL_RUN_IDS["TestRailRunIds<br/>Comma-separated Run IDs<br/>without R prefix"]
+        UPDATE_TESTRAIL["UpdateResultInTestRail<br/>true / false"]
+
+        TEST_CASES["ListOfTestCases<br/>New-line separated Case IDs"]
+        EXCEL["Optional Excel File"]
+        TEST_RUN_INFO["TestRunInfo<br/>JSON"]
+        REPO_BRANCH["RepoBranch"]
+        KIC_CREDENTIALS["KicCredentials"]
+        TRANSFER_LOGS["TransferLogs"]
+        ADDITIONAL_PARAMS["AdditionalParamsToCommonTPExecutionFramework"]
+        SUITES_INCLUDE_EXCLUDE["TestSuitesToIncludeOrExclude"]
+        SUITE_DURATION["TestSuiteDuration<br/>HH:MM:SS"]
+        EMAIL_REPORTS["EmailReportsTo"]
+    end
+
+    START --> PRODUCT
+    PRODUCT --> HOSTS
+    HOSTS --> REDMINE
+    REDMINE --> TESTRAIL_CREDS
+    TESTRAIL_CREDS --> CONFIG
+    CONFIG --> COMMON_INPUT
+    COMMON_INPUT --> MAPPING_PATH
+    MAPPING_PATH --> TESTRAIL_RUN_IDS
+    TESTRAIL_RUN_IDS --> UPDATE_TESTRAIL
+    UPDATE_TESTRAIL --> TEST_CASES
+    TEST_CASES --> EXCEL
+    EXCEL --> TEST_RUN_INFO
+    TEST_RUN_INFO --> REPO_BRANCH
+    REPO_BRANCH --> KIC_CREDENTIALS
+    KIC_CREDENTIALS --> TRANSFER_LOGS
+    TRANSFER_LOGS --> ADDITIONAL_PARAMS
+    ADDITIONAL_PARAMS --> SUITES_INCLUDE_EXCLUDE
+    SUITES_INCLUDE_EXCLUDE --> SUITE_DURATION
+    SUITE_DURATION --> EMAIL_REPORTS
+
+    subgraph STAGE1["STAGE I - Jenkins Agent"]
+        S1_START["Stage I"]
+        GIT_CHECKOUT_1["Git Checkout"]
+        INSTALL_REQ_1["Install requirement.txt"]
+
+        S1_START --> GIT_CHECKOUT_1
+        GIT_CHECKOUT_1 --> INSTALL_REQ_1
+    end
+
+    EMAIL_REPORTS --> S1_START
+    INSTALL_REQ_1 --> S2_START
+
+    subgraph STAGE2["STAGE II - On VM"]
+        S2_START["Stage II"]
+
+        GIT_CHECKOUT_2["Git Checkout"]
+        INSTALL_REQ_2["Install requirement.txt"]
+
+        UPDATE_YAML["Update system.yml<br/>using yaml_update.json<br/>based on user-defined configuration"]
+
+        CASE_CHECK{"ListOfTestCases<br/>provided?"}
+
+        PROCESS_CASES["Process ListOfTestCases<br/>Update YAML / cid_suite_paths"]
+
+        MAPPING_GENERATOR["Execute<br/>tools/mapping_generator.py<br/>using TestRun IDs + Excel file"]
+
+        UPDATE_TEST_RUN["Execute<br/>tools/multiple_test_run_utils/<br/>get_update_test_run_information.py<br/>Update and validate TestRunInfo"]
+
+        CREATE_SUITES["Execute<br/>tools/suite_creation/<br/>suite_creation_based_on_duration.py<br/>Create load-balanced suites"]
+
+        S2_START --> GIT_CHECKOUT_2
+        GIT_CHECKOUT_2 --> INSTALL_REQ_2
+        INSTALL_REQ_2 --> UPDATE_YAML
+        UPDATE_YAML --> CASE_CHECK
+
+        CASE_CHECK -->|Yes| PROCESS_CASES
+        CASE_CHECK -->|No| MAPPING_GENERATOR
+        PROCESS_CASES --> MAPPING_GENERATOR
+
+        MAPPING_GENERATOR --> UPDATE_TEST_RUN
+        UPDATE_TEST_RUN --> CREATE_SUITES
+    end
+
+    subgraph STAGE3["STAGE III - Test Execution"]
+        S3_START["Stage III"]
+
+        SUITE_LOOP{"For Each Suite"}
+
+        UPDATE_RUN_ID["Update system.yml<br/>with required Run ID"]
+
+        DOWNLOAD_BINARIES["Download and update<br/>firmware binaries<br/>in config/binary"]
+
+        VALIDATE_FIRMWARE["Execute<br/>tools/multiple_test_run_utils/<br/>validate_firmware_based_on_testrun.py"]
+
+        FIRMWARE_CHECK{"Firmware validation result"}
+
+        FLASH_FIRMWARE["Flash Firmware"]
+
+        LOAD_DRIVER["Load Driver"]
+
+        UPDATE_BASHRC["Update Bashrc<br/>with environment variables"]
+
+        ENV_SETUP["Execute env_simulation.py<br/>Setup environment based<br/>on suite markers"]
+
+        EXECUTE_SUITE["Execute command<br/>for selected suite"]
+
+        ENV_TEARDOWN["Execute env_simulation.py<br/>Restore environment based<br/>on suite markers"]
+
+        TRANSFER_CHECK{"TransferLogs<br/>enabled?"}
+
+        TRANSFER_LOGS_STEP["Transfer execution logs<br/>to log server"]
+
+        MORE_SUITES{"More suites?"}
+
+        S3_START --> SUITE_LOOP
+        SUITE_LOOP --> UPDATE_RUN_ID
+        UPDATE_RUN_ID --> DOWNLOAD_BINARIES
+        DOWNLOAD_BINARIES --> VALIDATE_FIRMWARE
+        VALIDATE_FIRMWARE --> FIRMWARE_CHECK
+
+        FIRMWARE_CHECK -->|Success / No flashing required| LOAD_DRIVER
+        FIRMWARE_CHECK -->|Failed with Error 1| FLASH_FIRMWARE
+        FLASH_FIRMWARE --> LOAD_DRIVER
+
+        LOAD_DRIVER --> UPDATE_BASHRC
+        UPDATE_BASHRC --> ENV_SETUP
+        ENV_SETUP --> EXECUTE_SUITE
+        EXECUTE_SUITE --> ENV_TEARDOWN
+        ENV_TEARDOWN --> TRANSFER_CHECK
+
+        TRANSFER_CHECK -->|Yes| TRANSFER_LOGS_STEP
+        TRANSFER_CHECK -->|No| MORE_SUITES
+
+        TRANSFER_LOGS_STEP --> MORE_SUITES
+
+        MORE_SUITES -->|Yes| SUITE_LOOP
+    end
+
+    CREATE_SUITES --> S3_START
+
+    MORE_SUITES -->|No| REPORT
+
+    REPORT["Generate Test Execution Report"]
+    EMAIL["Send Report to EmailReportsTo"]
+    END([Jenkins Job Complete])
+
+    REPORT --> EMAIL
+    EMAIL --> END
